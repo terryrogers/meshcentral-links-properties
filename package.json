@@ -1,0 +1,29 @@
+{
+  "name": "meshcentral-links-properties",
+  "version": "3.8.3",
+  "private": true,
+  "description": "Build-time dependencies for the Links & Properties MeshCentral plugin.",
+  "scripts": {
+    "build:vendor": "node scripts/build-vendor.js",
+    "prepare:update-assets": "node scripts/prepare-update-assets.js",
+    "test": "node tests/test.js"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "imask": "7.6.1",
+    "jedison": "1.20.2",
+    "jexl": "2.3.0",
+    "jmespath": "0.16.0",
+    "jquery": "3.7.1",
+    "keyv": "5.6.0",
+    "mysql2": "3.24.2",
+    "pg": "8.23.0",
+    "semantic-ui-css": "2.5.0",
+    "sql.js": "1.14.2",
+    "undici": "8.10.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

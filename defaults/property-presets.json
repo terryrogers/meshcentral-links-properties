@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "validationPresets": {
+    "custom": { "label": "Custom" },
+    "ipv4": {
+      "label": "IPv4 address",
+      "pattern": "^(?:(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)$",
+      "flags": "",
+      "message": "Enter a valid IPv4 address."
+    },
+    "hostname": {
+      "label": "Hostname / DNS name",
+      "pattern": "^(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)*[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$",
+      "flags": "i",
+      "maximumLength": 253,
+      "message": "Enter a valid hostname or DNS name."
+    },
+    "mac": {
+      "label": "MAC address",
+      "pattern": "^(?:[0-9A-F]{2}[:-]){5}[0-9A-F]{2}$",
+      "flags": "i",
+      "minimumLength": 17,
+      "maximumLength": 17,
+      "message": "Enter a valid MAC address."
+    },
+    "email": {
+      "label": "Email address",
+      "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+      "flags": "i",
+      "maximumLength": 254,
+      "message": "Enter a valid email address."
+    },
+    "port": {
+      "label": "TCP/UDP port",
+      "pattern": "^(?:0|[1-9]\\d{0,3}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])$",
+      "flags": "",
+      "maximumLength": 5,
+      "message": "Enter a port from 0 to 65535."
+    },
+    "uuid": {
+      "label": "UUID",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "flags": "i",
+      "minimumLength": 36,
+      "maximumLength": 36,
+      "message": "Enter a valid UUID."
+    }
+  },
+  "inputMaskPresets": {
+    "custom": { "label": "Custom" },
+    "ipv4": {
+      "label": "IPv4 address",
+      "pattern": "000.000.000.000",
+      "placeholder": "192.000.002.001",
+      "transform": "none"
+    },
+    "hostname": {
+      "label": "Hostname / DNS name",
+      "pattern": "",
+      "placeholder": "server.example.com",
+      "transform": "lower"
+    },
+    "mac": {
+      "label": "MAC address",
+      "pattern": "**:**:**:**:**:**",
+      "placeholder": "00:00:00:00:00:00",
+      "transform": "upper"
+    },
+    "email": {
+      "label": "Email address",
+      "pattern": "",
+      "placeholder": "name@example.com",
+      "transform": "lower"
+    },
+    "port": {
+      "label": "TCP/UDP port",
+      "pattern": "00000",
+      "placeholder": "443",
+      "transform": "none"
+    },
+    "uuid": {
+      "label": "UUID",
+      "pattern": "********-****-****-****-************",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "transform": "lower"
+    }
+  }
+}

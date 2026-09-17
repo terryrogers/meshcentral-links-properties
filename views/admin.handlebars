@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Links &amp; Properties</title>
+    <link rel="stylesheet" href="/pluginadmin.ashx?pin=devicepropertieslinks&amp;include=1&amp;path=semantic.min.css&amp;v={{pluginVersion}}">
+    <link rel="stylesheet" href="/pluginadmin.ashx?pin=devicepropertieslinks&amp;include=1&amp;path=admin.css&amp;v={{pluginVersion}}">
+    <link rel="stylesheet" href="/pluginadmin.ashx?pin=devicepropertieslinks&amp;include=1&amp;path=admin-extra.css&amp;v={{pluginVersion}}">
+</head>
+<body>
+    <main>
+        <header class="page-header">
+            <div>
+                <h1>Links &amp; Properties</h1>
+                <p>Define Device Input &amp; Read-only Properties &amp; Command or URL driven Links</p>
+            </div>
+            <span class="version">v{{pluginVersion}}</span>
+        </header>
+
+        <div class="toolbar">
+            <button id="refreshButton" type="button" class="secondary">Refresh</button>
+            <button id="exportButton" type="button" class="secondary">Export JSON</button>
+            <button id="importButton" type="button" class="secondary">Import JSON</button>
+            <input id="importFile" type="file" accept="application/json,.json" hidden>
+            <span id="revisionText"></span>
+        </div>
+
+        <div id="status" role="status" aria-live="polite"></div>
+
+        <details class="panel formula-help">
+            <summary>Variables &amp; Formula Quick Reference</summary>
+            <p>Use expressions inside braces in names, computed values, defaults, descriptions and link URLs.</p>
+            <p><code>{property.key}</code> <code>{device.name}</code> <code>{device.hostname}</code> <code>{device.ip}</code> <code>{device.id}</code> <code>{group.name}</code> <code>{group.id}</code> <code>{system.serverName}</code> <code>{system.dnsName}</code> <code>{system.serverUrl}</code> <code>{system.domain}</code> <code>{now()}</code></p>
+            <p>Functions: <code>concat()</code>, <code>proper()</code>, <code>upper()</code>, <code>lower()</code>, <code>trim()</code>, <code>len()</code>, <code>substring()</code>, <code>left()</code>, <code>right()</code>, <code>coalesce()</code>, <code>add()</code>, <code>subtract()</code>, <code>multiply()</code>, <code>divide()</code>, <code>mod()</code>, <code>round()</code> and <code>abs()</code>. Arithmetic operators <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> and <code>%</code> are also supported.</p>
+            <p>Example: <code>{concat(system.serverUrl, "device/", lower(device.name))}</code> or <code>{property.port + 1}</code>. Use <code>{left(now(), 10)}</code> for today in YYYY-MM-DD form.</p>
+        </details>
+
+        <section class="panel" id="propertyDefinitionsPanel">
+            <div class="section-heading">
+                <div>
+                    <h2>Property Definitions</h2>
+                    <p>Fields shown on the Device Information or Properties tabs when their visibility rules match</p>
+                </div>
+                <button id="addPropertyButton" type="button">Create Property</button>
+            </div>
+            <div id="propertyEmpty" class="empty">No property definitions have been created.</div>
+            <div id="propertyList" class="card-list"></div>
+        </section>
+
+        <section class="panel" id="linkGroupsPanel">
+            <div class="section-heading">
+                <div>
+                    <h2>Link Groups</h2>
+                    <p>Organise links into named groups with a shared display colour.</p>
+                </div>
+                <button id="addDisplayGroupButton" type="button">Create Link Group</button>
+            </div>
+            <div id="displayGroupEmpty" class="empty">No Link Groups have been created.</div>
+            <div id="displayGroupList" class="card-list"></div>
+        </section>
+
+        <section class="panel" id="linksPanel">
+            <div class="section-heading">
+                <div>
+                    <h2>Links</h2>
+                    <p>Two-line buttons that can open a link or run a command. Row and position control their exact layout.</p>
+                </div>
+                <button id="addLinkButton" type="button">Create Link</button>
+            </div>
+            <div id="linkEmpty" class="empty">No links have been created.</div>
+            <div id="linkList" class="card-list"></div>
+        </section>
+
+        <section class="panel" id="dataSourcesPanel">
+            <div class="section-heading"><div><h2>Data Sources</h2><p>Retrieve controlled JSON data on the server for formulas and selectable-list options.</p></div><button id="addDataSourceButton" type="button">Create Data Source</button></div>
+            <div id="dataSourceEmpty" class="empty">No Data Sources have been created.</div><div id="dataSourceList" class="card-list"></div>
+        </section>
+
+        <section class="panel" id="authenticationSecretsPanel">
+            <div class="section-heading"><div><h2>Authentication Secrets</h2><p>Create reusable named credentials for API Data Sources.</p></div><button id="addAuthenticationSecretButton" type="button">Create Authentication Secret</button></div>
+            <div id="authenticationSecretEmpty" class="empty">No Authentication Secrets have been created.</div><div id="authenticationSecretList" class="card-list"></div>
+        </section>
+    </main>
+
+    <dialog id="displayGroupDialog">
+        <form method="dialog" class="editor" id="displayGroupForm" novalidate autocomplete="off">
+            <div class="dialog-heading"><h2 id="displayGroupDialogTitle">Link Group</h2><button id="closeDisplayGroupButton" type="button" class="icon-close" aria-label="Close">×</button></div>
+            <input id="displayGroupId" type="hidden">
+            <div class="form-grid two">
+                <label>Name<input id="displayGroupName" type="text" maxlength="120" required></label>
+                <label>Display order<input id="displayGroupOrder" type="number" min="0" max="1000" value="1"></label>
+                <label>Colour<input id="displayGroupColor" class="colour-picker" type="color" value="#2458b8"></label>
+            </div>
+            <label>Description<textarea id="displayGroupDescription" maxlength="300"></textarea></label>
+            <section class="rules-section"><h3>Permissions and visibility</h3><p class="hint">Choose which device groups, users, user groups or individual devices can see items in this link group. Nested groups support ALL, ANY and NONE logic.</p><div id="displayGroupRules"></div><div id="displayGroupPreview" class="preview"></div></section>
+            <div id="displayGroupSaveStatus" class="preview"></div>
+            <div class="dialog-actions"><button id="cancelDisplayGroupButton" type="button" class="secondary">Cancel</button><button id="saveDisplayGroupButton" type="submit">Save Link Group</button></div>
+        </form>
+    </dialog>
+
+    <dialog id="propertyDialog">
+        <form method="dialog" class="editor" id="propertyForm" novalidate autocomplete="off">
+            <div class="dialog-heading"><h2 id="propertyDialogTitle">Create Property</h2><button id="closePropertyButton" type="button" class="icon-close" aria-label="Close">×</button></div>
+            <input id="propertyId" type="hidden">
+            <section class="wizard-step active" id="propertyModeStep">
+                <h3>1. Property Type</h3>
+                <label>Property Type<select id="propertyMode" required><option value="">Select a property type…</option><option value="readonly">Read-Only</option><option value="input">Input</option></select></label>
+            </section>
+            <section class="wizard-step" id="propertyIdentityStep" hidden>
+                <h3>2. Property Identity</h3>
+                <div class="form-grid two identity-grid">
+                    <label>Name<input id="propertyLabel" type="text" maxlength="120" required autocomplete="off"></label>
+                    <label>Description<textarea id="propertyDescription" maxlength="500" rows="2"></textarea></label>
+                </div>
+                <p id="propertyNameStatus" class="hint" aria-live="polite"></p>
+            </section>
+            <div id="propertyDetailsSteps" hidden>
+            <section class="wizard-step">
+                <h3>3. Display</h3>
+                <label class="compact-field">Display Order<input id="propertyOrder" class="four-digit-input" type="number" min="0" max="9999" step="1" inputmode="numeric" value="0"></label>
+                <div class="form-grid two colour-field-row">
+                    <label>Name Colour<input id="propertyLabelColor" class="colour-picker" type="color" value="#071a4a"></label>
+                    <label>Name Background Colour<input id="propertyLabelBackground" class="colour-picker" type="color" value="#ffffff"></label>
+                </div>
+                <div class="check-row style-options"><strong>Name Style:</strong><label><input id="propertyLabelBold" type="checkbox"> Bold</label><label><input id="propertyLabelItalic" type="checkbox"> Italics</label><label><input id="propertyLabelUnderline" type="checkbox"> Underline</label></div>
+                <div id="propertyReadonlyDisplayOptions" hidden>
+                    <div class="form-grid two colour-field-row">
+                        <label>Value Colour<input id="propertyValueColor" class="colour-picker" type="color" value="#071a4a"></label>
+                        <label>Value Background Colour<input id="propertyValueBackground" class="colour-picker" type="color" value="#ffffff"></label>
+                    </div>
+                    <div class="check-row style-options"><strong>Value Style:</strong><label><input id="propertyValueBold" type="checkbox"> Bold</label><label><input id="propertyValueItalic" type="checkbox"> Italics</label><label><input id="propertyValueUnderline" type="checkbox"> Underline</label></div>
+                </div>
+            </section>
+            <section class="wizard-step" id="propertyReadonlyStep" hidden>
+                <h3>4. Read-Only Value</h3>
+                <label><span class="field-title">Computed Value <button type="button" class="formula-button" data-formula-target="propertyValueTemplate">fx</button></span><textarea id="propertyValueTemplate" maxlength="4096" rows="3" placeholder="Example: {upper(device.name)}"></textarea></label>
+            </section>
+            <section class="wizard-step" id="propertyInputStep" hidden>
+                <h3>4. Input Configuration</h3>
+                <div class="form-grid two property-input-grid">
+                <label>Type
+                    <select id="propertyType"><option value="">Select an input type…</option>
+                        <option value="url">URL</option><option value="text">Text</option><option value="multiline">Multiline Text</option><option value="password">Password</option><option value="email">Email</option><option value="tel">Telephone</option><option value="color">Colour</option>
+                        <option value="number">Number</option><option value="integer">Whole number</option><option value="range">Range slider</option><option value="boolean">Boolean</option>
+                        <option value="date">Date</option><option value="time">Time</option><option value="datetime">Date and time</option><option value="month">Month</option><option value="week">Week</option>
+                        <option value="select">Selectable List</option><option value="multiselect">Multi-select List</option><option value="tags">Tag list</option>
+                    </select>
+                </label>
+                <label><span class="field-title">Default Value <button type="button" class="formula-button" data-formula-target="propertyDefaultTemplate">fx</button></span><textarea id="propertyDefaultTemplate" maxlength="4096" rows="3" placeholder="Used when no device value is stored"></textarea></label>
+                </div>
+            <div id="numberSettings" class="conditional-box">
+                <h3>Number settings</h3>
+                <div class="form-grid four">
+                    <label>Minimum<input id="propertyMinimum" type="number"></label><label>Maximum<input id="propertyMaximum" type="number"></label>
+                    <label>Step<input id="propertyStep" type="number" min="0" step="any"></label><label>Unit<input id="propertyUnit" type="text" maxlength="30"></label>
+                </div>
+            </div>
+            <div id="selectSettings" class="conditional-box">
+                <h3>List options</h3>
+                <p>Enter one option per line as <code>value|Display label</code>.</p>
+                <textarea id="propertyOptions" rows="6" placeholder="active|Active&#10;standby|Standby&#10;retired|Retired"></textarea>
+                <div class="form-grid three"><label>Dynamic source<select id="optionSourceKey"><option value="">None</option></select></label><label>Value JMESPath<input id="optionValueExpression" placeholder="id"></label><label>Label JMESPath<input id="optionLabelExpression" placeholder="name"></label></div>
+            </div>
+            <div id="propertyInputOptions" hidden>
+            <div class="check-row optional-feature-toggle"><label><input id="validationEnabled" type="checkbox"> Enable validation</label></div>
+            <div id="validationSettings" class="conditional-box" hidden>
+                <h3>Value validation</h3>
+                <div class="form-grid two">
+                    <label>Preset<select id="validationPreset"><option value="custom">Custom</option></select></label>
+                    <label>Regular-expression flags<input id="validationFlags" type="text" maxlength="3" placeholder="i, m or u"></label>
+                    <label>Minimum length<input id="validationMinimumLength" type="number" min="0" max="8192"></label>
+                    <label>Maximum length<input id="validationMaximumLength" type="number" min="1" max="8192"></label>
+                </div>
+                <label>Regular expression<input id="validationPattern" type="text" maxlength="512" placeholder="Example: ^[A-Za-z0-9.-]+$"></label>
+                <label>Validation error message<input id="validationMessage" type="text" maxlength="300" placeholder="Shown when the value is rejected"></label>
+            </div>
+            <div class="check-row optional-feature-toggle"><label><input id="inputMaskEnabled" type="checkbox"> Enable input mask</label></div>
+            <div id="inputMaskSettings" class="conditional-box" hidden>
+                <h3>Input mask</h3>
+                <p class="hint"><code>0</code> accepts a digit, <code>A</code> a letter and <code>*</code> a letter or digit. Other characters are inserted literally.</p>
+                <div class="form-grid two">
+                    <label>Preset<select id="inputMaskPreset"><option value="custom">Custom</option></select></label>
+                    <label>Mask pattern<input id="maskPattern" type="text" maxlength="128" placeholder="Example: AA-AA-AA-AA-AA-AA"></label>
+                    <label>Input placeholder<input id="maskPlaceholder" type="text" maxlength="128" placeholder="Example: 00-00-00-00-00-00"></label>
+                    <label>Case conversion<select id="maskTransform"><option value="none">No conversion</option><option value="upper">UPPERCASE</option><option value="lower">lowercase</option></select></label>
+                </div>
+            </div>
+            <div class="check-row optional-feature-toggle"><label><input id="propertyEnabled" type="checkbox"> Enabled</label></div>
+            </div>
+            </section>
+            <section class="wizard-step" id="propertyReadonlyStateStep" hidden><div class="check-row"><label><input id="propertyEnabledReadonly" type="checkbox"> Enabled</label></div></section>
+            <section class="rules-section" id="propertyVisibilityStep" hidden><h3>Visibility</h3><p class="hint">Empty ALL rules are visible globally. Nested groups support ALL, ANY and NONE logic.</p><div id="propertyRules"></div><div id="propertyPreview" class="preview"></div></section>
+            </div>
+            <div id="propertySaveStatus" class="preview" hidden></div>
+            <div class="dialog-actions"><button id="cancelPropertyButton" type="button" class="secondary">Cancel</button><button id="savePropertyButton" type="submit" value="default">Save Property</button></div>
+        </form>
+    </dialog>
+
+    <dialog id="dataSourceDialog">
+        <form method="dialog" class="editor" id="dataSourceForm" novalidate autocomplete="off">
+            <div class="dialog-heading"><h2 id="dataSourceDialogTitle">Data Source</h2><button id="closeDataSourceButton" type="button" class="icon-close" aria-label="Close">×</button></div><input id="dataSourceId" type="hidden">
+            <section class="wizard-step active"><h3>1. Type</h3><label>Type<select id="dataSourceType" required><option value="">Select a Data Source type…</option><option value="staticList">Static List</option><option value="databaseQuery">Database Query</option><option value="apiQuery">API Query</option></select></label></section>
+            <section class="wizard-step active" id="dataSourceIdentityStep" hidden><h3>2. Identity</h3><div class="form-grid two identity-grid"><label>Name<input id="dataSourceName" maxlength="120" required autocomplete="off"></label><label>Description<textarea id="dataSourceDescription" rows="2" maxlength="500"></textarea></label></div><p id="dataSourceNameStatus" class="hint" aria-live="polite"></p></section>
+
+            <div id="apiSourceSteps" hidden>
+                <section class="wizard-step active" id="apiDeviceStep"><h3>3. Device</h3><label>Device<select id="apiDataSourceDevice"><option value="">None</option></select></label></section>
+                <section class="wizard-step active" id="apiVariablesStep"><div class="section-heading"><div><h3>4. Request Variables</h3><p>Use literals, formulas, properties or outputs from another Data Source.</p></div><div class="button-row"><button id="addDataSourceVariableButton" type="button" class="secondary">Add Variable</button><button id="addDataSourceApiVariableButton" type="button" class="secondary">Add From Data Source</button></div></div><div id="dataSourceVariables" class="repeat-list"></div></section>
+                <section class="wizard-step active" id="apiRequestStep"><h3>5. Request</h3><div class="form-grid two"><label><span class="field-title">URL <button type="button" class="formula-button" data-formula-target="dataSourceUrl">fx</button></span><input id="dataSourceUrl" maxlength="2048" autocomplete="off" spellcheck="false" placeholder="https://..."></label><label>Method<select id="dataSourceMethod"><option value="">Select a method…</option><option>GET</option><option>POST</option></select></label></div><div class="tls-control"><label class="check-row"><input id="dataSourceTlsVerify" type="checkbox" checked> Verify TLS Certificate</label><button id="viewTlsCertificateButton" type="button" class="inline-link-button">View Certificate</button></div><p class="hint">Keep certificate verification enabled whenever possible. Untick it only for a trusted internal API whose private or self-signed certificate cannot be verified by the MeshCentral container.</p><label id="dataSourceBodyLabel">POST Body / Formula<textarea id="dataSourceBody" rows="4"></textarea></label></section>
+                <section class="wizard-step active" id="apiAuthenticationStep" hidden><h3>6. Authentication</h3><div class="form-grid two authentication-selector-row"><label>Saved Credential<select id="dataSourceAuthSecret"><option value="">None</option></select></label><div class="button-field"><button id="createAuthenticationSecretFromDataSourceButton" type="button" class="secondary">Create Authentication Secret</button></div></div><div hidden><select id="dataSourceAuth"><option value="none">None</option><option value="bearerStored">Stored Bearer Token</option><option value="headerStored">Stored API Key / Header Value</option><option value="basicStored">Stored Username &amp; Password</option></select><input id="dataSourceHeaderName" type="hidden"><input id="dataSourceToken" type="hidden"><input id="dataSourceUsername" type="hidden"><input id="dataSourcePassword" type="hidden"></div><p class="credential-warning">Authentication Secrets are stored with the plugin configuration and are available only to authorised plugin administrators.</p></section>
+                <section class="wizard-step active" id="apiHeadersStep" hidden><div class="section-heading"><div><h3>7. Headers</h3><p>Add request headers without writing JSON.</p></div></div><div class="inline-add-grid"><label>Header<input id="dataSourceHeaderNewName" maxlength="100" autocomplete="off" placeholder="Enter Header Name..."></label><label>Value<input id="dataSourceHeaderNewValue" maxlength="2048" autocomplete="off" placeholder="Enter Header Value..."></label><button id="addDataSourceHeaderButton" type="button">Add Header</button></div><div id="dataSourceHeaderList" class="table-list"></div></section>
+                <section class="wizard-step active" id="apiLimitsStep" hidden><h3>8. Limits</h3><div class="form-grid three"><label>Cache Seconds<input id="dataSourceCache" type="number" min="0" max="86400" value="300"></label><label>Timeout Milliseconds<input id="dataSourceTimeout" type="number" min="500" max="30000" value="5000"></label><label>Maximum Response Bytes<input id="dataSourceMaxBytes" type="number" min="1024" max="5242880" value="524288"></label></div></section>
+                <section class="wizard-step active" id="apiFiltersStep" hidden><div class="section-heading"><div><h3>10. Filters</h3><p>This Filter is applied to every Output Variable Input. Filters support case-insensitive wildcards (<code>*</code> and <code>?</code>), AND (<code>&amp;&amp;</code>), OR (<code>||</code>) and grouping with parentheses, for example <code>(model == '*UDM*' || model == '*UXG*') &amp;&amp; state == 'ONLINE'</code>.</p></div></div><label>Filter<div id="dataSourceOutputFilterDropdown" class="ui fluid search selection dropdown"><input id="dataSourceOutputFilter" type="hidden"><i class="dropdown icon"></i><div class="default text">Select or enter a Filter...</div><div id="dataSourceOutputFilterMenu" class="menu"></div></div></label></section>
+                <section class="wizard-step active" id="apiOutputsStep"><div class="section-heading"><div><h3>11. Output Variables</h3><p>The internal path is derived automatically as <code>api.data_source_name.variable_name</code>. Select an Input collection, then leave Output empty for the matching object or select one of its fields. The Filter configured above is applied to every Input.</p></div><button id="addDataSourceOutputButton" type="button" class="secondary">Add Output Variable</button></div><div id="dataSourceOutputs" class="repeat-list"></div></section>
+            </div>
+
+            <div id="staticSourceSteps" hidden>
+                <section class="wizard-step active" id="staticListStep"><h3>3. List</h3><label class="compact-field">Entry<select id="staticEntryMode"><option value="friendly">Friendly</option><option value="advanced">Advanced</option></select></label><div id="staticFriendlyFields"><div class="inline-add-grid"><label>Name<input id="staticEntryName" maxlength="512"></label><label>Value<input id="staticEntryValue" maxlength="2048"></label><button id="addStaticEntryButton" type="button">Add</button></div><div id="staticEntryList" class="table-list"></div></div><div id="staticAdvancedFields" hidden><label>Entries <span class="hint">One <code>name,value</code> pair per line.</span><textarea id="staticAdvancedEntries" rows="10" spellcheck="false"></textarea></label></div></section>
+                <section class="wizard-step active" id="staticOutputStep" hidden><h3>5. Variable</h3><label>Name<input id="staticOutputName" maxlength="120" autocomplete="off"></label></section>
+            </div>
+
+            <div id="databaseSourceSteps" hidden>
+                <section class="wizard-step active" id="databaseTypeStep"><h3>3. Database Type</h3><label>Database Type<select id="databaseType"><option value="">Select a database…</option><option value="mysql">MySQL</option><option value="mariadb">MariaDB</option><option value="postgresql">PostgreSQL</option><option value="sqlite">SQLite</option></select></label></section>
+                <section class="wizard-step active" id="databaseConnectionStep" hidden><h3>4. Connection</h3><div id="networkDatabaseFields" class="form-grid two"><label>Host<input id="databaseHost" maxlength="253" autocomplete="off"></label><label>Port<input id="databasePort" type="number" min="1" max="65535"></label><label>Database<input id="databaseName" maxlength="512" autocomplete="off"></label><label>Username<input id="databaseUsername" maxlength="512" autocomplete="off"></label><label>Password<div class="secret-field"><input id="databasePassword" type="password" autocomplete="new-password"><button type="button" class="reveal-secret" data-secret-target="databasePassword" aria-label="Show database password">👁</button></div></label><div class="check-row"><label><input id="databaseSsl" type="checkbox"> Use TLS/SSL</label></div></div><label id="sqliteFilenameLabel">SQLite Database Filename<input id="databaseFilename" maxlength="2048" autocomplete="off" spellcheck="false" placeholder="/opt/meshcentral/meshcentral-data/example.sqlite"></label><div class="test-strip"><span id="databaseConnectionStatus" class="validation-status">Complete the required connection fields.</span><button id="retryDatabaseConnectionButton" type="button" class="secondary">Retry</button></div></section>
+                <section class="wizard-step active" id="databaseQueryStep" hidden><h3>5. Query</h3><label><span class="field-title">Read-only SELECT / WITH Query <button type="button" class="formula-button" data-formula-target="databaseQuery">fx</button></span><textarea id="databaseQuery" rows="8" spellcheck="false"></textarea></label><button id="previewDatabaseQueryButton" type="button">Preview Results</button><div id="databaseQueryPreview" class="data-preview" hidden></div></section>
+                <section class="wizard-step active" id="databaseFilterStep" hidden><h3>6. Filter &amp; Limits</h3><div class="form-grid two"><label>JMESPath Filter<input id="databaseFilter" maxlength="1024" placeholder="[?state == 'ONLINE']"></label><label>Maximum Rows<input id="databaseLimit" type="number" min="1" max="10000" value="500"></label></div></section>
+                <section class="wizard-step active" id="databaseOutputStep" hidden><h3>7. Output Variable</h3><div class="form-grid two"><label>Name<input id="databaseOutputName" maxlength="120"></label><label>Data Selection<select id="databaseOutputMode"><option value="set">Set — JSON array of row objects</option><option value="row">Row — one row object</option><option value="column">Column — values from one column</option><option value="cell">Cell — one row and column value</option></select></label><label id="databaseRowIndexLabel">Row Index<input id="databaseRowIndex" type="number" min="0" max="999999" value="0"></label><label id="databaseColumnLabel">Column<select id="databaseColumn"></select></label></div><button id="previewDatabaseVariableButton" type="button" class="secondary">Preview Variable</button><div id="databaseVariablePreview" class="data-preview" hidden></div></section>
+            </div>
+
+            <section class="wizard-step active" id="dataSourceAvailabilityStep" hidden><h3 id="dataSourceAvailabilityHeading">9. Availability</h3><div class="check-row"><label><input id="dataSourceEnabled" type="checkbox"> Enabled</label></div></section>
+            <section class="wizard-step active" id="dataSourceTestStep" hidden><h3 id="dataSourceTestHeading">Validation &amp; Preview</h3><label id="dataSourceTestDeviceLabel">Test Device<select id="dataSourceTestDevice"></select></label><div class="validation-status-row"><strong>Validation Status:</strong><span id="dataSourceTestStatus" class="validation-status">Complete the required fields to test this Data Source.</span></div><div class="preview-label-row"><strong>Preview:</strong><button id="refreshDataSourcePreviewButton" type="button" class="secondary small-button">Refresh</button></div><details id="dataSourcePreviewDetails" class="collapsible-preview"><summary>Response Preview</summary><div id="dataSourceResultPreview" class="data-preview" hidden></div></details></section>
+            <div id="dataSourceSaveStatus" class="preview" hidden></div>
+            <div class="dialog-actions"><button id="cancelDataSourceButton" type="button" class="secondary">Cancel</button><button id="saveDataSourceButton" type="submit">Save Data Source</button></div>
+        </form>
+    </dialog>
+
+    <dialog id="authenticationSecretDialog">
+        <form method="dialog" class="editor" id="authenticationSecretForm" novalidate autocomplete="off">
+            <div class="dialog-heading"><h2 id="authenticationSecretDialogTitle">Create Authentication Secret</h2><button id="closeAuthenticationSecretButton" type="button" class="icon-close" aria-label="Close">×</button></div>
+            <input id="authenticationSecretId" type="hidden">
+            <section class="wizard-step active"><h3>1. Identity</h3><div class="form-grid two identity-grid"><label>Name<input id="authenticationSecretName" maxlength="120" required autocomplete="off"></label><label>Description<textarea id="authenticationSecretDescription" rows="2" maxlength="500"></textarea></label></div><p id="authenticationSecretNameStatus" class="hint" aria-live="polite"></p></section>
+            <section class="wizard-step active"><h3>2. Authentication</h3><label>Type<select id="authenticationSecretType" required><option value="">Select an authentication type…</option><option value="bearerStored">Bearer Token</option><option value="headerStored">API Key / Header Value</option><option value="basicStored">Username &amp; Password</option></select></label><div class="form-grid two"><label id="authenticationSecretHeaderLabel">Header Name<input id="authenticationSecretHeaderName" maxlength="100" value="X-API-Key" autocomplete="off" spellcheck="false"></label><label id="authenticationSecretTokenLabel">Token / Key<div class="secret-field"><input id="authenticationSecretToken" type="password" maxlength="4096" autocomplete="new-password" spellcheck="false"><button type="button" class="reveal-secret" data-secret-target="authenticationSecretToken" aria-label="Show token or key">👁</button></div></label><label id="authenticationSecretUsernameLabel">Username<input id="authenticationSecretUsername" maxlength="512" autocomplete="off" spellcheck="false"></label><label id="authenticationSecretPasswordLabel">Password<div class="secret-field"><input id="authenticationSecretPassword" type="password" maxlength="4096" autocomplete="new-password" spellcheck="false"><button type="button" class="reveal-secret" data-secret-target="authenticationSecretPassword" aria-label="Show password">👁</button></div></label></div></section>
+            <div id="authenticationSecretSaveStatus" class="preview" hidden></div>
+            <div class="dialog-actions"><button id="cancelAuthenticationSecretButton" type="button" class="secondary">Cancel</button><button id="saveAuthenticationSecretButton" type="submit">Save Authentication Secret</button></div>
+        </form>
+    </dialog>
+
+    <dialog id="tlsCertificateDialog">
+        <div class="editor">
+            <div class="dialog-heading"><h2>TLS Certificate Details</h2><button id="closeTlsCertificateButton" type="button" class="icon-close" aria-label="Close">×</button></div>
+            <div id="tlsCertificateStatus" class="validation-status">Enter an HTTPS URL to inspect its certificate.</div>
+            <div id="tlsCertificateDetails" class="data-preview" hidden></div>
+            <div class="dialog-actions"><button id="dismissTlsCertificateButton" type="button">Close</button></div>
+        </div>
+    </dialog>
+
+    <dialog id="linkDialog">
+        <form method="dialog" class="editor" id="linkForm" novalidate autocomplete="off">
+            <div class="dialog-heading"><h2 id="linkDialogTitle">Create Link</h2><button id="closeLinkButton" type="button" class="icon-close" aria-label="Close">×</button></div>
+            <input id="linkId" type="hidden">
+            <section class="wizard-step active" id="linkTypeStep">
+                <h3>1. Link Type</h3>
+                <label>Link Type<select id="linkKind" required><option value="">Select a link type…</option><option value="link">URL</option><option value="command">Command</option></select></label>
+            </section>
+            <section class="wizard-step" id="linkIdentityStep" hidden>
+                <h3>2. Link Identity</h3>
+                <div class="form-grid two identity-grid">
+                    <label>Name<input id="linkName" type="text" maxlength="120" required autocomplete="off"></label>
+                    <label><span class="field-title">Description <button type="button" class="formula-button" data-formula-target="linkDescription">fx</button></span><textarea id="linkDescription" maxlength="500" rows="2"></textarea></label>
+                </div>
+                <label><span class="field-title">Hint <button type="button" class="formula-button" data-formula-target="linkHint">fx</button></span><textarea id="linkHint" maxlength="500" rows="2" placeholder="Optional extra guidance shown when the pointer rests over the item"></textarea></label>
+                <p id="linkNameStatus" class="hint" aria-live="polite"></p>
+            </section>
+            <div id="linkDetailsSteps" hidden>
+            <section class="wizard-step" id="linkDisplayStep">
+                <h3>3. Display</h3>
+                <div class="form-grid two compact-number-row">
+                    <label>Row Number<input id="linkRow" class="four-digit-input" type="number" min="1" max="9999" step="1" inputmode="numeric" value="1"></label>
+                    <label>Position<input id="linkOrder" class="four-digit-input" type="number" min="1" max="9999" step="1" inputmode="numeric" value="1"></label>
+                </div>
+                <div class="form-grid two colour-field-row">
+                    <label>Link Group<select id="linkDisplayGroup"><option value="">No group</option></select></label>
+                    <label id="linkColorField" hidden>Colour<input id="linkColor" class="colour-picker" type="color" value="#2458b8"></label>
+                </div>
+                <div class="check-row item-colour-options"><label><input id="itemUseGroupColor" type="checkbox" checked> Use Link Group Colour</label></div>
+            </section>
+            <section class="wizard-step" id="linkConfigurationStep">
+                <h3 id="linkConfigurationTitle">4. Item Configuration</h3>
+                <div id="linkFields"><label id="linkProtocolLabel">URI Scheme
+                    <div id="linkProtocolDropdown" class="ui fluid search selection dropdown">
+                        <input id="linkProtocol" type="hidden" name="uriScheme">
+                        <i class="dropdown icon"></i><div class="default text">Search or select a URI scheme</div><div id="linkProtocolMenu" class="menu"></div>
+                    </div>
+                    <span class="hint">Search or browse the official IANA list, or type a valid custom scheme.</span>
+                </label>
+                <label><span class="field-title">URL <button type="button" class="formula-button" data-formula-target="linkUrl">fx</button></span><input id="linkUrl" type="text" maxlength="2048" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="https://{property.managementUrl}"></label>
+                <label><span class="field-title">Fallback <button type="button" class="formula-button" data-formula-target="linkDefaultUrl">fx</button></span><input id="linkDefaultUrl" type="text" maxlength="2048" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="Optional; used when the primary URL cannot resolve"></label>
+                <button id="openSchemeRegistrationButton" type="button" class="secondary">Register a URI scheme…</button></div>
+            <div id="commandFields" class="conditional-box"><div class="form-grid two"><label>Shell<select id="commandShell"><option value="cmd">Windows CMD</option><option value="ps">PowerShell</option><option value="sh">Linux/macOS shell</option><option value="agent">Agent console</option></select></label><label>Execution<select id="commandMode"><option value="run">Run and show output</option><option value="terminal">Type into Terminal</option></select></label><label>Run as<select id="commandRunAs"><option value="0">Agent / SYSTEM / root</option><option value="1">Signed-in user if available</option><option value="2">Signed-in user only</option></select></label></div>
+                <label><span class="field-title">Command / formula <button type="button" class="formula-button" data-formula-target="commandText">fx</button></span><textarea id="commandText" maxlength="16384" rows="6"></textarea></label>
+                <label><span class="field-title">Confirmation text / formula <button type="button" class="formula-button" data-formula-target="commandConfirmText">fx</button></span><textarea id="commandConfirmText" maxlength="1000"></textarea></label><label><input id="commandConfirm" type="checkbox"> Ask before running</label></div>
+            </section>
+            <section class="wizard-step" id="linkEnabledStep"><h3>5. Enabled</h3><div class="check-row"><label><input id="linkEnabled" type="checkbox"> Enabled</label></div></section>
+            <section class="rules-section" id="linkVisibilityStep"><h3>6. Visibility</h3>
+                <div class="check-row link-location"><strong>Link Location:</strong><label><input id="itemShowGeneral" type="checkbox" checked> General Page</label><label><input id="itemShowTerminal" type="checkbox"> Terminal Strip</label></div>
+                <label>Rule source<select id="itemRuleMode"><option value="inherit">Inherit Link Group rule</option><option value="override">Override Link Group for this item</option></select></label><p id="itemRuleExplanation" class="hint"></p><div id="itemRuleEditor"><div id="linkRules"></div><div id="linkPreview" class="preview"></div></div>
+            </section>
+            </div>
+            <div id="linkSaveStatus" class="preview"></div><div class="dialog-actions"><button id="cancelLinkButton" type="button" class="secondary">Cancel</button><button id="saveLinkButton" type="submit" value="default">Save Link</button></div>
+        </form>
+    </dialog>
+
+    <dialog id="formulaDialog" class="tool-dialog">
+        <form method="dialog" class="editor" id="formulaForm" autocomplete="off">
+            <div class="dialog-heading"><h2 id="formulaDialogTitle">Formula Compose</h2><button id="closeFormulaButton" type="button" class="icon-close" aria-label="Close">×</button></div>
+            <div class="form-grid two">
+                <label>Variable<select id="formulaVariable"></select></label>
+                <label>Function<select id="formulaFunction"></select></label>
+            </div>
+            <div class="toolbar"><button id="insertVariableButton" type="button" class="secondary">Insert Variable</button><button id="insertFunctionButton" type="button" class="secondary">Insert Function</button><button id="insertTextButton" type="button" class="secondary" title="Insert a literal quoted value for use as text or as a function argument.">Insert Quoted Text</button></div>
+            <p class="hint">Insert Quoted Text adds a literal such as <code>&quot;text&quot;</code>, which can be used directly or as a function argument.</p>
+            <label>Formula / Template<textarea id="formulaText" rows="8" maxlength="8192"></textarea></label>
+            <label>Preview Using Device...<select id="formulaPreviewDevice"></select></label>
+            <div id="formulaPreview" class="preview" aria-live="polite">Enter a formula to preview it.</div>
+            <div class="dialog-actions"><button id="cancelFormulaButton" type="button" class="secondary">Cancel</button><button id="copyFormulaButton" type="button" class="secondary" disabled>Copy</button><button id="applyFormulaButton" type="button" disabled>Insert Into Field</button></div>
+        </form>
+    </dialog>
+
+    <dialog id="schemeRegistrationDialog" class="tool-dialog">
+        <form method="dialog" class="editor" id="schemeRegistrationForm" autocomplete="off">
+            <div class="dialog-heading"><h2>Register a URI scheme</h2><button id="closeSchemeRegistrationButton" type="button" class="icon-close" aria-label="Close">×</button></div>
+            <p class="hint">Registration changes how the selected desktop account launches links. Windows uses the current-user registry; Linux desktops use an XDG desktop entry and MIME association.</p>
+            <div class="form-grid two">
+                <label>Operating system<select id="schemeOperatingSystem"><option value="windows">Windows</option><option value="linux">Linux desktop</option></select></label>
+                <label>Scheme name<input id="schemeName" type="text" maxlength="64" placeholder="putty" required></label>
+                <label>Display name<input id="schemeDisplayName" type="text" maxlength="100" placeholder="PuTTY URL Handler" required></label>
+                <label>Handler executable<input id="schemeExecutable" type="text" maxlength="1024" placeholder="%ProgramFiles%\PuTTY\putty.exe" required></label>
+                <label>Argument template<input id="schemeArguments" type="text" maxlength="500" value="&quot;%1&quot;" required></label>
+            </div>
+            <label>Target<select id="schemeTarget"></select></label>
+            <div id="schemeRegistrationStatus" class="preview" aria-live="polite"></div>
+            <div class="dialog-actions"><button id="cancelSchemeRegistrationButton" type="button" class="secondary">Cancel</button><button id="downloadSchemeRegistrationButton" type="button" class="secondary">Download installer</button><button id="runSchemeRegistrationButton" type="submit">Register through MeshCentral</button></div>
+        </form>
+    </dialog>
+
+    <script src="/pluginadmin.ashx?pin=devicepropertieslinks&amp;include=1&amp;path=jquery.min.js&amp;v={{pluginVersion}}"></script>
+    <script src="/pluginadmin.ashx?pin=devicepropertieslinks&amp;include=1&amp;path=semantic.min.js&amp;v={{pluginVersion}}"></script>
+    <script src="/pluginadmin.ashx?pin=devicepropertieslinks&amp;include=1&amp;path=iana-uri-schemes.js&amp;v={{pluginVersion}}"></script>
+    <script src="/pluginadmin.ashx?pin=devicepropertieslinks&amp;include=1&amp;path=vendor-browser.js&amp;v={{pluginVersion}}"></script>
+    <script src="/pluginadmin.ashx?pin=devicepropertieslinks&amp;include=1&amp;path=admin.js&amp;v={{pluginVersion}}"></script>
+</body>
+</html>

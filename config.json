@@ -1,0 +1,17 @@
+{
+  "name": "Links & Properties",
+  "shortName": "devicepropertieslinks",
+  "version": "3.8.3",
+  "author": "The Tech Wizard",
+  "description": "Device input and read-only properties with command-driven or URL-driven links.",
+  "hasAdminPanel": true,
+  "homepage": "https://github.com/terryrogers/meshcentral-links-properties",
+  "changelogUrl": "https://raw.githubusercontent.com/terryrogers/meshcentral-links-properties/main/changelog.md",
+  "configUrl": "https://raw.githubusercontent.com/terryrogers/meshcentral-links-properties/main/config.json",
+  "downloadUrl": "https://github.com/terryrogers/meshcentral-links-properties/releases/latest/download/devicepropertieslinks.zip",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/terryrogers/meshcentral-links-properties.git"
+  },
+  "meshCentralCompat": ">=1.2.5"
+}

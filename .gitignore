@@ -1,0 +1,33 @@
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+.nyc_output/
+
+# Private retained evidence and legacy deployment material
+legacy/
+references/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.local
+config.local.json
+config.private.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Logs, caches, and temporary files
+*.log
+logs/
+tmp/
+temp/
+.cache/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+/.tools/
