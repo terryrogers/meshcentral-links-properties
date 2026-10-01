@@ -21,7 +21,7 @@ fs.rmSync(output, { recursive: true, force: true });
 fs.mkdirSync(output, { recursive: true });
 
 fs.copyFileSync(path.join(root, 'config.json'), path.join(output, 'config.json'));
-fs.copyFileSync(path.join(root, 'changelog.md'), path.join(output, 'changelog.md'));
+fs.copyFileSync(path.join(root, 'CHANGELOG.md'), path.join(output, 'CHANGELOG.md'));
 fs.copyFileSync(archive, path.join(output, 'devicepropertieslinks.zip'));
 
 console.log(`Prepared update assets for Links & Properties ${manifest.version}: ${output}`);

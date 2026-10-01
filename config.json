@@ -6,7 +6,7 @@
   "description": "Device input and read-only properties with command-driven or URL-driven links.",
   "hasAdminPanel": true,
   "homepage": "https://github.com/terryrogers/meshcentral-links-properties",
-  "changelogUrl": "https://raw.githubusercontent.com/terryrogers/meshcentral-links-properties/main/changelog.md",
+  "changelogUrl": "https://raw.githubusercontent.com/terryrogers/meshcentral-links-properties/main/CHANGELOG.md",
   "configUrl": "https://raw.githubusercontent.com/terryrogers/meshcentral-links-properties/main/config.json",
   "downloadUrl": "https://github.com/terryrogers/meshcentral-links-properties/releases/latest/download/devicepropertieslinks.zip",
   "repository": {

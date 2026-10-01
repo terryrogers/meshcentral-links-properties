@@ -5,6 +5,12 @@ const fs = require('fs');
 const path = require('path');
 const factory = require('../devicepropertieslinks.js').devicepropertieslinks;
 
+const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'config.json'), 'utf8'));
+const rootFiles = fs.readdirSync(path.join(__dirname, '..'));
+assert.ok(rootFiles.includes('CHANGELOG.md'), 'the standardized uppercase CHANGELOG.md must exist');
+assert.ok(!rootFiles.includes('changelog.md'), 'the legacy lowercase changelog.md must not remain');
+assert.match(manifest.changelogUrl, /\/CHANGELOG\.md$/, 'the published changelog URL must use the standardized uppercase filename');
+
 const db = {};
 const root = { db: db, args: {}, DispatchEvent: function () {} };
 let registeredPermissions = null;
