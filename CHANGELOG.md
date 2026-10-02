@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Refresh repository quality gates, add the approved licence decision metadata, & enforce managed-module drift checks.
+
 ## 3.8.3 - 2026-08-30
 
 - Render read-only Information values as plain text instead of disabled text boxes.
