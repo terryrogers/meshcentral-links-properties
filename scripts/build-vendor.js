@@ -6,7 +6,7 @@ const fs = require('fs');
 
 const root = path.resolve(__dirname, '..');
 
-fs.copyFileSync(require.resolve('jquery/dist/jquery.min.js'), path.join(root, 'includes', 'jquery.min.js'));
+fs.copyFileSync(path.join(path.dirname(require.resolve('jquery')), 'jquery.min.js'), path.join(root, 'includes', 'jquery.min.js'));
 fs.copyFileSync(require.resolve('semantic-ui-css/semantic.min.js'), path.join(root, 'includes', 'semantic.min.js'));
 fs.copyFileSync(require.resolve('semantic-ui-css/semantic.min.css'), path.join(root, 'includes', 'semantic.min.css'));
 const semanticCssPath = path.join(root, 'includes', 'semantic.min.css');

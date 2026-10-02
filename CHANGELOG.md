@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Retain the required PowerShell quality check during automatic reconciliation.
+
+- Resolve the jQuery vendor asset through its supported package entry point so the pinned jQuery 4 build succeeds.
+
+- Refresh repository quality gates, add the approved licence decision metadata, & enforce managed-module drift checks.
+
 ## 3.8.3 - 2026-08-30
 
 - Render read-only Information values as plain text instead of disabled text boxes.
