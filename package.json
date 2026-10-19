@@ -20,7 +20,7 @@
     "mysql2": "3.24.5",
     "pg": "8.23.1",
     "semantic-ui-css": "2.5.0",
-    "sql.js": "1.14.2",
+    "sql.js": "1.15.0",
     "undici": "8.12.2"
   },
   "devDependencies": {
