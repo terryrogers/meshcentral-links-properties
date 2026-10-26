@@ -21,7 +21,7 @@
     "pg": "8.23.1",
     "semantic-ui-css": "2.5.0",
     "sql.js": "1.15.0",
-    "undici": "8.12.2"
+    "undici": "8.12.3"
   },
   "devDependencies": {
     "esbuild": "0.28.2"
